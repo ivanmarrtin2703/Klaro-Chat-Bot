@@ -1,0 +1,9 @@
+name = "citaclara-app"
+compatibility_date = "2025-10-01"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "citaclara-db"
+database_id = "local-citaclara-db"
+migrations_dir = "migrations"

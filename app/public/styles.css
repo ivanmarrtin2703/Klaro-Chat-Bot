@@ -1,0 +1,106 @@
+:root {
+  --bg: #14110f;
+  --ink: #f4efe6;
+  --muted: #b7a99a;
+  --accent: #e8a87c;
+  --line: rgba(244, 239, 230, 0.12);
+  --font: 'DM Sans', system-ui, sans-serif;
+  --display: 'Instrument Serif', Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.app-home main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem;
+}
+.brand {
+  font-family: var(--display);
+  font-size: 2.5rem;
+  margin: 0;
+}
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.links a {
+  text-decoration: none;
+  border: 1px solid var(--line);
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  color: var(--ink);
+}
+.links a:hover { border-color: var(--accent); }
+
+.demo, .admin {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+.chat-log {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  min-height: 320px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  background: rgba(244,239,230,0.03);
+}
+.msg {
+  max-width: 85%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 1rem;
+  font-size: 0.95rem;
+}
+.msg.user { justify-self: end; background: rgba(232,168,124,0.22); }
+.msg.bot { justify-self: start; background: rgba(244,239,230,0.08); }
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+input, textarea, button, select {
+  font: inherit;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background: rgba(244,239,230,0.04);
+  color: var(--ink);
+  padding: 0.75rem 0.9rem;
+}
+button {
+  background: linear-gradient(135deg, #e8a87c, #c4784a);
+  color: #1a120c;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.row input { flex: 1; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th, td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.35rem;
+  text-align: left;
+}
+.pin-box {
+  max-width: 320px;
+  display: grid;
+  gap: 0.75rem;
+}
+.error { color: #ff8f7a; }

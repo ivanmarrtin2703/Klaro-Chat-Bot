@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo chat — CitaClara</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Instrument+Serif&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="demo">
+      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">CitaClara</p>
+      <p class="muted" id="salonMeta">Cargando salón demo…</p>
+      <div class="chat-log" id="log" aria-live="polite"></div>
+      <form class="row" id="form">
+        <input id="input" autocomplete="off" placeholder="Escribe: precios, horario, quiero cita…" />
+        <button type="submit">Enviar</button>
+      </form>
+      <p class="muted"><a href="/">← App</a> · <a href="/admin/">Admin</a></p>
+    </div>
+    <script>
+      const log = document.getElementById('log');
+      const form = document.getElementById('form');
+      const input = document.getElementById('input');
+      const from = 'demo-' + Math.random().toString(36).slice(2, 8);
+
+      function add(role, text) {
+        const el = document.createElement('div');
+        el.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+        el.textContent = text;
+        log.appendChild(el);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      fetch('/api/salon?slug=atelier-luna')
+        .then((r) => r.json())
+        .then((d) => {
+          const s = d.salon;
+          document.getElementById('salonMeta').textContent =
+            (s?.name || 'Demo') + ' · ' + (s?.neighborhood || '') + ' · ' + (s?.services?.length || 0) + ' servicios';
+          add('bot', s?.greeting || 'Hola');
+        })
+        .catch(() => {
+          document.getElementById('salonMeta').textContent = 'Error cargando salón (¿migraste D1?)';
+        });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        add('user', text);
+        input.value = '';
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, from, slug: 'atelier-luna' })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'error');
+          add('bot', data.reply);
+        } catch (err) {
+          add('bot', 'Error: ' + err.message);
+        }
+      });
+    </script>
+  </body>
+</html>

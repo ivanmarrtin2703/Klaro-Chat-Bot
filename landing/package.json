@@ -1,0 +1,15 @@
+{
+  "name": "citaclara-landing",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Landing de captación CitaClara",
+  "scripts": {
+    "dev": "wrangler pages dev public --persist-to=.wrangler/state",
+    "db:migrate:local": "wrangler d1 migrations apply citaclara-landing-db --local --persist-to=.wrangler/state",
+    "db:migrate:remote": "wrangler d1 migrations apply citaclara-landing-db --remote",
+    "deploy": "wrangler pages deploy public --project-name=citaclara"
+  },
+  "devDependencies": {
+    "wrangler": "^4.40.0"
+  }
+}

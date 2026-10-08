@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin agency — CitaClara</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Instrument+Serif&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="admin">
+      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">CitaClara Admin</p>
+      <p class="muted">Panel agency (no entregar al salón). PIN default local: 1234</p>
+
+      <div id="login" class="pin-box">
+        <input id="pin" type="password" inputmode="numeric" placeholder="PIN" />
+        <button id="loginBtn" type="button">Entrar</button>
+        <p class="error" id="loginErr" hidden></p>
+      </div>
+
+      <div id="panel" hidden>
+        <div class="row">
+          <button type="button" id="reload">Recargar</button>
+          <button type="button" id="logout">Salir</button>
+        </div>
+        <h2>Servicios / precios</h2>
+        <table>
+          <thead>
+            <tr><th>Servicio</th><th>€</th><th>Min</th><th></th></tr>
+          </thead>
+          <tbody id="svcBody"></tbody>
+        </table>
+        <h2>Conversaciones recientes</h2>
+        <ul id="convs" class="muted"></ul>
+        <h2>Citas</h2>
+        <ul id="appts" class="muted"></ul>
+      </div>
+      <p class="muted"><a href="/demo/">Demo chat</a> · <a href="/">App</a></p>
+    </div>
+    <script>
+      const login = document.getElementById('login');
+      const panel = document.getElementById('panel');
+      const loginErr = document.getElementById('loginErr');
+
+      async function checkSession() {
+        const r = await fetch('/api/admin/session', { credentials: 'same-origin' });
+        if (r.ok) {
+          login.hidden = true;
+          panel.hidden = false;
+          await loadAll();
+        }
+      }
+
+      async function loadAll() {
+        const svc = await fetch('/api/admin/services?slug=atelier-luna', { credentials: 'same-origin' }).then((r) => r.json());
+        const body = document.getElementById('svcBody');
+        body.innerHTML = '';
+        (svc.services || []).forEach((s) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${s.name}</td>
+            <td><input data-id="${s.id}" data-f="price" value="${s.price_eur}" style="width:4.5rem" /></td>
+            <td><input data-id="${s.id}" data-f="dur" value="${s.duration_min}" style="width:4rem" /></td>
+            <td><button type="button" data-save="${s.id}">Guardar</button></td>`;
+          body.appendChild(tr);
+        });
+        body.querySelectorAll('[data-save]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-save');
+            const price = body.querySelector(`[data-id="${id}"][data-f="price"]`).value;
+            const duration_min = body.querySelector(`[data-id="${id}"][data-f="dur"]`).value;
+            await fetch('/api/admin/services', {
+              method: 'PUT',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: Number(id), price_eur: Number(price), duration_min: Number(duration_min) })
+            });
+            btn.textContent = 'OK';
+            setTimeout(() => (btn.textContent = 'Guardar'), 800);
+          });
+        });
+
+        const convs = await fetch('/api/admin/conversations?slug=atelier-luna', { credentials: 'same-origin' }).then((r) => r.json());
+        document.getElementById('convs').innerHTML = (convs.conversations || [])
+          .map((c) => `<li><strong>${c.wa_from}</strong> — ${c.last_message || ''}</li>`)
+          .join('') || '<li>Sin conversaciones aún</li>';
+
+        const appts = await fetch('/api/admin/appointments?slug=atelier-luna', { credentials: 'same-origin' }).then((r) => r.json());
+        document.getElementById('appts').innerHTML = (appts.appointments || [])
+          .map((a) => `<li>${a.client_name || a.client_phone} · ${a.starts_at} · ${a.status}</li>`)
+          .join('') || '<li>Sin citas aún</li>';
+      }
+
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        loginErr.hidden = true;
+        const pin = document.getElementById('pin').value;
+        const r = await fetch('/api/admin/login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin })
+        });
+        if (!r.ok) {
+          loginErr.hidden = false;
+          loginErr.textContent = 'PIN incorrecto';
+          return;
+        }
+        login.hidden = true;
+        panel.hidden = false;
+        await loadAll();
+      });
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+        location.reload();
+      });
+      document.getElementById('reload').addEventListener('click', loadAll);
+      checkSession();
+    </script>
+  </body>
+</html>
