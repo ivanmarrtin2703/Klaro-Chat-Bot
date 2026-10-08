@@ -6,8 +6,8 @@
 | Landing | hecho |
 | Bot app | hecho (demo + webhook + admin) |
 | Meta docs | hecho |
-| GitHub | en progreso |
-| Portfolio | en progreso |
+| GitHub | hecho — https://github.com/ivanmarrtin2703/citaclara |
+| Portfolio | hecho — demo `/demos/citaclara/` + `npm run seed:citaclara` |
 
 ## Verificado local
 - `/api/salon` → Atelier Luna, 7 servicios  

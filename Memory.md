@@ -7,7 +7,7 @@
 - [x] Landing de captación
 - [x] App bot desde 0 (demo, webhook, admin, D1)
 - [x] Docs Meta / checklist producción
-- [ ] GitHub + card en Mi Página Web
+- [x] GitHub + card en Mi Página Web (repo + seed/demo portfolio)
 
 ## Decisiones
 - Marca: **CitaClara**
