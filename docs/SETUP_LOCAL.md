@@ -26,5 +26,9 @@ Si el puerto 8788 está ocupado:
 npx wrangler pages dev public --persist-to=.wrangler/state --port 8790
 ```
 
-- Demo: `/demo/`  
-- Admin: `/admin/` (PIN `1234` en `.dev.vars`)  
+- Demo (chat por opciones): `/demo/`  
+- Admin agency: `/admin/` (PIN `1234` en `.dev.vars`)  
+- Panel local: `/hoy/` (ej. slug `fisio-demo`, PIN `4321`)  
+
+Plan / estado: [`PLAN_PRODUCCION.md`](PLAN_PRODUCCION.md), [`memory/ESTADO.md`](../memory/ESTADO.md).  
+

@@ -1,13 +1,13 @@
 {
-  "name": "citaclara-landing",
+  "name": "klaro-landing",
   "private": true,
   "version": "1.0.0",
-  "description": "Landing de captación CitaClara",
+  "description": "Landing de captación Klaro (proyecto Pages klaroapp)",
   "scripts": {
     "dev": "wrangler pages dev public --persist-to=.wrangler/state",
-    "db:migrate:local": "wrangler d1 migrations apply citaclara-landing-db --local --persist-to=.wrangler/state",
-    "db:migrate:remote": "wrangler d1 migrations apply citaclara-landing-db --remote",
-    "deploy": "wrangler pages deploy public --project-name=citaclara"
+    "db:migrate:local": "wrangler d1 migrations apply recebot-landing-db --local --persist-to=.wrangler/state",
+    "db:migrate:remote": "wrangler d1 migrations apply recebot-landing-db --remote",
+    "deploy": "wrangler pages deploy public --project-name=klaroapp --branch=main --commit-dirty=true"
   },
   "devDependencies": {
     "wrangler": "^4.40.0"

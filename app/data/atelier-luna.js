@@ -1,12 +1,18 @@
 export const demoBrain = {
   slug: 'atelier-luna',
   name: 'Atelier Luna',
+  business_type: 'peluqueria',
   neighborhood: 'Zapillo, Almería',
   timezone: 'Europe/Madrid',
   tone: 'cercano',
   greeting: 'Hola, soy la recepcionista de Atelier Luna. ¿En qué te ayudo?',
   handoff_phone: '',
+  owner_phone: '',
   cancel_policy_hours: 12,
+  monthly_fee: 129,
+  billing_status: 'ok',
+  local_pin: '4321',
+  paused_message: 'Ahora mismo no podemos atender por WhatsApp. Llamanos o inténtalo más tarde.',
   hours: {
     mon: ['10:00-14:00', '17:00-20:00'],
     tue: ['10:00-14:00', '17:00-20:00'],

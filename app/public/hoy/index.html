@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hoy — agenda del local</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Instrument+Serif&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="admin">
+      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">Hoy</p>
+      <p class="muted" id="sub">Agenda del día · solo para el local</p>
+
+      <div id="login" class="pin-box">
+        <input id="slug" placeholder="slug del local" />
+        <input id="pin" type="password" inputmode="numeric" placeholder="PIN local" />
+        <button id="loginBtn" type="button">Entrar</button>
+        <p class="error" id="loginErr" hidden></p>
+        <p class="muted">Demo fisio: slug <code>fisio-demo</code> · PIN <code>4321</code></p>
+      </div>
+
+      <div id="panel" hidden>
+        <div class="row">
+          <button type="button" id="reload">Recargar</button>
+          <button type="button" id="logout">Salir</button>
+        </div>
+        <h2>Próximas / hoy</h2>
+        <ul id="list" class="muted"></ul>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const login = document.getElementById('login');
+      const panel = document.getElementById('panel');
+      const loginErr = document.getElementById('loginErr');
+      if (params.get('slug')) document.getElementById('slug').value = params.get('slug');
+
+      function labelSlot(starts) {
+        if (!starts) return '';
+        const parts = String(starts).split('|');
+        return parts[1] || parts[0];
+      }
+
+      async function loadAppts() {
+        const r = await fetch('/api/hoy/appointments', { credentials: 'same-origin' });
+        if (!r.ok) {
+          panel.hidden = true;
+          login.hidden = false;
+          return;
+        }
+        const data = await r.json();
+        document.getElementById('sub').textContent = data.salon?.name || 'Agenda';
+        const ul = document.getElementById('list');
+        const rows = data.appointments || [];
+        ul.innerHTML =
+          rows
+            .map((a) => {
+              const done = a.status === 'done';
+              return `<li style="margin-bottom:0.75rem">
+                <strong>${labelSlot(a.starts_at)}</strong> — ${a.client_name || 'Sin nombre'}
+                · ${a.client_phone || ''}
+                · ${a.service_name || 'servicio'}
+                · <em>${a.status}</em>
+                ${done ? '' : `<button type="button" data-id="${a.id}" style="margin-left:0.5rem">Atendido</button>`}
+              </li>`;
+            })
+            .join('') || '<li>Sin citas todavía</li>';
+
+        ul.querySelectorAll('[data-id]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            await fetch('/api/hoy/appointments', {
+              method: 'PATCH',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: Number(btn.getAttribute('data-id')) })
+            });
+            await loadAppts();
+          });
+        });
+      }
+
+      async function checkSession() {
+        const r = await fetch('/api/hoy/session', { credentials: 'same-origin' });
+        if (r.ok) {
+          login.hidden = true;
+          panel.hidden = false;
+          await loadAppts();
+        }
+      }
+
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        loginErr.hidden = true;
+        const r = await fetch('/api/hoy/login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: document.getElementById('slug').value.trim(),
+            pin: document.getElementById('pin').value
+          })
+        });
+        if (!r.ok) {
+          loginErr.hidden = false;
+          loginErr.textContent = 'PIN o slug incorrecto';
+          return;
+        }
+        login.hidden = true;
+        panel.hidden = false;
+        await loadAppts();
+      });
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await fetch('/api/hoy/logout', { method: 'POST', credentials: 'same-origin' });
+        location.reload();
+      });
+      document.getElementById('reload').addEventListener('click', loadAppts);
+      checkSession();
+    </script>
+  </body>
+</html>

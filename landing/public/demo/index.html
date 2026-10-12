@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Probar demo — Klaro</title>
+    <meta
+      name="description"
+      content="Prueba el chat de Klaro: precios, horarios y citas por opciones, como en WhatsApp."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="top">
+      <div class="top-inner">
+        <a class="logo" href="/">Klaro</a>
+        <nav class="top-nav" aria-label="Principal">
+          <a class="top-link" href="/">Inicio</a>
+          <a class="top-cta" id="ctaTop" href="/#contacto">WhatsApp</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="demo-page">
+      <p class="demo-kicker">Demo interactiva</p>
+      <h1 class="demo-title">Prueba el recepcionista</h1>
+      <p class="demo-lede" id="salonMeta">Cargando negocio demo…</p>
+      <label class="demo-slug muted">
+        Negocio demo
+        <select id="slugSel">
+          <option value="fisio-demo" selected>fisio-demo</option>
+          <option value="atelier-luna">atelier-luna</option>
+        </select>
+      </label>
+      <div class="chat-log" id="log" aria-live="polite"></div>
+      <form class="demo-row" id="form">
+        <input id="input" autocomplete="off" placeholder="Nombre u otro texto…" />
+        <button class="btn primary" type="submit">Enviar</button>
+      </form>
+      <p class="muted demo-hint">Elige opciones con los botones. El nombre se escribe a mano.</p>
+      <p class="muted"><a href="/">← Volver a Klaro</a></p>
+    </main>
+
+    <script src="/config.js"></script>
+    <script>
+      const API = 'https://citaclara-app.pages.dev';
+      const log = document.getElementById('log');
+      const form = document.getElementById('form');
+      const input = document.getElementById('input');
+      const slugSel = document.getElementById('slugSel');
+      const from = 'demo-' + Math.random().toString(36).slice(2, 8);
+      let slug = 'fisio-demo';
+
+      (function wireWa() {
+        const cfg = window.KLARO || window.RECEBOT || {};
+        const n = String(cfg.whatsappNumber || '').replace(/\D/g, '');
+        const msg = encodeURIComponent(cfg.whatsappPrefill || '');
+        const href = n ? `https://wa.me/${n}?text=${msg}` : '/#contacto';
+        const top = document.getElementById('ctaTop');
+        if (top) top.href = href;
+      })();
+
+      function addUser(text) {
+        const el = document.createElement('div');
+        el.className = 'msg user';
+        el.textContent = text;
+        log.appendChild(el);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function addOptButton(box, { id, title, description, row }) {
+        if (!id) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = row ? 'opt-btn opt-row' : 'opt-btn';
+        if (row) {
+          const strong = document.createElement('strong');
+          strong.textContent = title || id;
+          btn.appendChild(strong);
+          if (description) {
+            const span = document.createElement('span');
+            span.textContent = description;
+            btn.appendChild(span);
+          }
+        } else {
+          btn.textContent = title || id;
+        }
+        btn.addEventListener('click', () => send({ interactiveId: id, text: title || id }));
+        box.appendChild(btn);
+      }
+
+      function addBot(text, interactive) {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg-bot-wrap';
+        const el = document.createElement('div');
+        el.className = 'msg bot';
+        el.textContent = text;
+        wrap.appendChild(el);
+
+        if (interactive) {
+          const box = document.createElement('div');
+          box.className = 'opt-box';
+          if (interactive.type === 'buttons') {
+            (interactive.buttons || []).forEach((b) => addOptButton(box, b));
+          } else {
+            (interactive.sections || []).forEach((sec) => {
+              (sec.rows || []).forEach((r) => addOptButton(box, { ...r, row: true }));
+            });
+          }
+          if (box.childElementCount) wrap.appendChild(box);
+        }
+
+        log.appendChild(wrap);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      async function send({ text = '', interactiveId = null }) {
+        const label = text || interactiveId || '';
+        if (label) addUser(label);
+        try {
+          const res = await fetch(API + '/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, interactiveId, from, slug })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'error');
+          addBot(data.reply, data.interactive);
+        } catch (err) {
+          addBot('Error: ' + err.message, null);
+        }
+      }
+
+      async function loadSalon() {
+        slug = slugSel.value;
+        log.innerHTML = '';
+        try {
+          const r = await fetch(API + '/api/salon?slug=' + encodeURIComponent(slug));
+          const d = await r.json();
+          const s = d.salon;
+          document.getElementById('salonMeta').textContent =
+            (s?.name || 'Demo') +
+            ' · ' +
+            (s?.business_type || '') +
+            ' · ' +
+            (s?.services?.length || 0) +
+            ' servicios';
+          await send({ text: 'hola' });
+        } catch {
+          document.getElementById('salonMeta').textContent =
+            'Error cargando negocio (¿API o CORS?)';
+        }
+      }
+
+      slugSel.addEventListener('change', loadSalon);
+      loadSalon();
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        await send({ text });
+      });
+    </script>
+  </body>
+</html>

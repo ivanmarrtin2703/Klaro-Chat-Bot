@@ -68,6 +68,39 @@ a { color: var(--accent); }
 }
 .msg.user { justify-self: end; background: rgba(232,168,124,0.22); }
 .msg.bot { justify-self: start; background: rgba(244,239,230,0.08); }
+.msg-bot-wrap {
+  justify-self: start;
+  display: grid;
+  gap: 0.45rem;
+  max-width: 95%;
+}
+.opt-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.opt-btn {
+  background: rgba(244, 239, 230, 0.08);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+  text-align: left;
+}
+.opt-btn:hover { border-color: var(--accent); }
+.opt-row {
+  width: 100%;
+  display: grid;
+  gap: 0.15rem;
+}
+.opt-row span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
 .row {
   display: flex;
   gap: 0.5rem;

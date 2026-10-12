@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Demo chat — CitaClara</title>
+    <title>Demo chat — opciones</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Instrument+Serif&display=swap"
@@ -13,59 +13,130 @@
   </head>
   <body>
     <div class="demo">
-      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">CitaClara</p>
-      <p class="muted" id="salonMeta">Cargando salón demo…</p>
+      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">Demo chat</p>
+      <p class="muted" id="salonMeta">Cargando local demo…</p>
+      <label class="muted">Local
+        <select id="slugSel">
+          <option value="fisio-demo" selected>fisio-demo</option>
+          <option value="atelier-luna">atelier-luna</option>
+        </select>
+      </label>
       <div class="chat-log" id="log" aria-live="polite"></div>
       <form class="row" id="form">
-        <input id="input" autocomplete="off" placeholder="Escribe: precios, horario, quiero cita…" />
+        <input id="input" autocomplete="off" placeholder="Nombre u otro texto…" />
         <button type="submit">Enviar</button>
       </form>
-      <p class="muted"><a href="/">← App</a> · <a href="/admin/">Admin</a></p>
+      <p class="muted">Elige opciones con los botones. El nombre se escribe a mano.</p>
+      <p class="muted"><a href="/">← App</a> · <a href="/admin/">Admin</a> · <a href="/hoy/">Hoy</a></p>
     </div>
     <script>
       const log = document.getElementById('log');
       const form = document.getElementById('form');
       const input = document.getElementById('input');
+      const slugSel = document.getElementById('slugSel');
       const from = 'demo-' + Math.random().toString(36).slice(2, 8);
+      let slug = 'fisio-demo';
 
-      function add(role, text) {
+      function addUser(text) {
         const el = document.createElement('div');
-        el.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+        el.className = 'msg user';
         el.textContent = text;
         log.appendChild(el);
         log.scrollTop = log.scrollHeight;
       }
 
-      fetch('/api/salon?slug=atelier-luna')
-        .then((r) => r.json())
-        .then((d) => {
+      function addOptButton(box, { id, title, description, row }) {
+        if (!id) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = row ? 'opt-btn opt-row' : 'opt-btn';
+        if (row) {
+          const strong = document.createElement('strong');
+          strong.textContent = title || id;
+          btn.appendChild(strong);
+          if (description) {
+            const span = document.createElement('span');
+            span.textContent = description;
+            btn.appendChild(span);
+          }
+        } else {
+          btn.textContent = title || id;
+        }
+        btn.addEventListener('click', () => send({ interactiveId: id, text: title || id }));
+        box.appendChild(btn);
+      }
+
+      function addBot(text, interactive) {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg-bot-wrap';
+        const el = document.createElement('div');
+        el.className = 'msg bot';
+        el.textContent = text;
+        wrap.appendChild(el);
+
+        if (interactive) {
+          const box = document.createElement('div');
+          box.className = 'opt-box';
+          if (interactive.type === 'buttons') {
+            (interactive.buttons || []).forEach((b) => addOptButton(box, b));
+          } else {
+            (interactive.sections || []).forEach((sec) => {
+              (sec.rows || []).forEach((r) => addOptButton(box, { ...r, row: true }));
+            });
+          }
+          if (box.childElementCount) wrap.appendChild(box);
+        }
+
+        log.appendChild(wrap);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      async function send({ text = '', interactiveId = null }) {
+        const label = text || interactiveId || '';
+        if (label) addUser(label);
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, interactiveId, from, slug })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'error');
+          addBot(data.reply, data.interactive);
+        } catch (err) {
+          addBot('Error: ' + err.message, null);
+        }
+      }
+
+      async function loadSalon() {
+        slug = slugSel.value;
+        log.innerHTML = '';
+        try {
+          const r = await fetch('/api/salon?slug=' + encodeURIComponent(slug));
+          const d = await r.json();
           const s = d.salon;
           document.getElementById('salonMeta').textContent =
-            (s?.name || 'Demo') + ' · ' + (s?.neighborhood || '') + ' · ' + (s?.services?.length || 0) + ' servicios';
-          add('bot', s?.greeting || 'Hola');
-        })
-        .catch(() => {
-          document.getElementById('salonMeta').textContent = 'Error cargando salón (¿migraste D1?)';
-        });
+            (s?.name || 'Demo') +
+            ' · ' +
+            (s?.business_type || '') +
+            ' · ' +
+            (s?.services?.length || 0) +
+            ' servicios';
+          await send({ text: 'hola' });
+        } catch {
+          document.getElementById('salonMeta').textContent = 'Error cargando local (¿migraste D1?)';
+        }
+      }
+
+      slugSel.addEventListener('change', loadSalon);
+      loadSalon();
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const text = input.value.trim();
         if (!text) return;
-        add('user', text);
         input.value = '';
-        try {
-          const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, from, slug: 'atelier-luna' })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'error');
-          add('bot', data.reply);
-        } catch (err) {
-          add('bot', 'Error: ' + err.message);
-        }
+        await send({ text });
       });
     </script>
   </body>

@@ -12,8 +12,8 @@
   </head>
   <body>
     <div class="admin">
-      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">CitaClara Admin</p>
-      <p class="muted">Panel agency (no entregar al salón). PIN default local: 1234</p>
+      <p class="brand" style="font-family: Instrument Serif, serif; font-size: 2rem; margin: 0">Agency Admin</p>
+      <p class="muted">Panel agency (no entregar al local). PIN default: 1234</p>
 
       <div id="login" class="pin-box">
         <input id="pin" type="password" inputmode="numeric" placeholder="PIN" />
@@ -26,44 +26,155 @@
           <button type="button" id="reload">Recargar</button>
           <button type="button" id="logout">Salir</button>
         </div>
-        <h2>Servicios / precios</h2>
-        <table>
-          <thead>
-            <tr><th>Servicio</th><th>€</th><th>Min</th><th></th></tr>
-          </thead>
-          <tbody id="svcBody"></tbody>
-        </table>
-        <h2>Conversaciones recientes</h2>
-        <ul id="convs" class="muted"></ul>
-        <h2>Citas</h2>
-        <ul id="appts" class="muted"></ul>
+
+        <h2>Locales</h2>
+        <label class="muted">Filtro
+          <select id="filterBilling">
+            <option value="">Todos</option>
+            <option value="ok">Cobro ok</option>
+            <option value="pending">Pendiente</option>
+            <option value="overdue">Atrasado</option>
+            <option value="paused">Bot pausado</option>
+          </select>
+        </label>
+        <ul id="salonList" class="muted"></ul>
+
+        <div id="detail" hidden>
+          <h2 id="detailTitle">Detalle</h2>
+          <p class="muted" id="detailMeta"></p>
+
+          <div class="row" style="flex-wrap: wrap">
+            <label>Cobro
+              <select id="billingStatus">
+                <option value="ok">ok</option>
+                <option value="pending">pending</option>
+                <option value="overdue">overdue</option>
+              </select>
+            </label>
+            <label>Próximo pago
+              <input id="nextPayment" type="date" />
+            </label>
+            <label>Mensual €
+              <input id="monthlyFee" type="number" step="1" style="width:5rem" />
+            </label>
+            <button type="button" id="saveBilling">Guardar cobro</button>
+          </div>
+
+          <div class="row" style="flex-wrap: wrap; margin-top: 0.75rem">
+            <button type="button" id="togglePause">Pausar bot</button>
+            <label>Tel. dueño
+              <input id="ownerPhone" placeholder="346..." style="width:9rem" />
+            </label>
+            <button type="button" id="saveOwner">Guardar dueño</button>
+          </div>
+
+          <label style="display:block;margin-top:0.75rem">Notas agency
+            <textarea id="agencyNotes" rows="3" style="width:100%"></textarea>
+          </label>
+          <div class="row">
+            <button type="button" id="saveNotes">Guardar notas</button>
+            <button type="button" id="notifyOwner">Avisar dueño (WA)</button>
+          </div>
+          <p class="muted" id="actionMsg"></p>
+
+          <p class="muted">PIN panel Hoy: <code id="localPin"></code> · <a id="hoyLink" href="/hoy/">/hoy/</a></p>
+
+          <h2>Servicios / precios</h2>
+          <table>
+            <thead>
+              <tr><th>Servicio</th><th>€</th><th>Min</th><th></th></tr>
+            </thead>
+            <tbody id="svcBody"></tbody>
+          </table>
+          <h2>Conversaciones recientes</h2>
+          <ul id="convs" class="muted"></ul>
+          <h2>Citas</h2>
+          <ul id="appts" class="muted"></ul>
+        </div>
+
+        <h2>Alta rápida</h2>
+        <div class="row" style="flex-wrap: wrap">
+          <input id="newName" placeholder="Nombre comercial" />
+          <input id="newSlug" placeholder="slug" />
+          <select id="newType">
+            <option value="fisio">fisio</option>
+            <option value="peluqueria">peluqueria</option>
+            <option value="otro">otro</option>
+          </select>
+          <button type="button" id="createLocal">Crear local</button>
+        </div>
       </div>
-      <p class="muted"><a href="/demo/">Demo chat</a> · <a href="/">App</a></p>
+      <p class="muted"><a href="/demo/">Demo chat</a> · <a href="/hoy/">Panel Hoy</a> · <a href="/">App</a></p>
     </div>
     <script>
       const login = document.getElementById('login');
       const panel = document.getElementById('panel');
       const loginErr = document.getElementById('loginErr');
+      let currentSlug = 'fisio-demo';
+      let salonsCache = [];
 
       async function checkSession() {
         const r = await fetch('/api/admin/session', { credentials: 'same-origin' });
         if (r.ok) {
           login.hidden = true;
           panel.hidden = false;
-          await loadAll();
+          await loadSalons();
         }
       }
 
-      async function loadAll() {
-        const svc = await fetch('/api/admin/services?slug=atelier-luna', { credentials: 'same-origin' }).then((r) => r.json());
+      function filteredSalons() {
+        const f = document.getElementById('filterBilling').value;
+        return salonsCache.filter((s) => {
+          if (!f) return true;
+          if (f === 'paused') return !!s.bot_paused;
+          return s.billing_status === f;
+        });
+      }
+
+      async function loadSalons() {
+        const data = await fetch('/api/admin/salons', { credentials: 'same-origin' }).then((r) => r.json());
+        salonsCache = data.salons || [];
+        const list = document.getElementById('salonList');
+        list.innerHTML = '';
+        filteredSalons().forEach((s) => {
+          const li = document.createElement('li');
+          const paused = s.bot_paused ? ' · PAUSADO' : '';
+          li.innerHTML = `<button type="button" data-slug="${s.slug}" style="all:unset;cursor:pointer;color:inherit">
+            <strong>${s.name}</strong> (${s.business_type || '?'}) — ${s.billing_status}${paused}
+          </button>`;
+          list.appendChild(li);
+        });
+        list.querySelectorAll('[data-slug]').forEach((btn) => {
+          btn.addEventListener('click', () => selectSalon(btn.getAttribute('data-slug')));
+        });
+        if (salonsCache.some((s) => s.slug === currentSlug)) await selectSalon(currentSlug);
+        else if (salonsCache[0]) await selectSalon(salonsCache[0].slug);
+      }
+
+      async function selectSalon(slug) {
+        currentSlug = slug;
+        document.getElementById('detail').hidden = false;
+        const s = salonsCache.find((x) => x.slug === slug) || {};
+        document.getElementById('detailTitle').textContent = s.name || slug;
+        document.getElementById('detailMeta').textContent = `${slug} · ${s.neighborhood || ''} · fee ${s.monthly_fee || 129}€`;
+        document.getElementById('billingStatus').value = s.billing_status || 'ok';
+        document.getElementById('nextPayment').value = (s.next_payment_at || '').slice(0, 10);
+        document.getElementById('monthlyFee').value = s.monthly_fee ?? 129;
+        document.getElementById('ownerPhone').value = s.owner_phone || '';
+        document.getElementById('agencyNotes').value = s.agency_notes || '';
+        document.getElementById('localPin').textContent = s.local_pin || '(sin PIN)';
+        document.getElementById('hoyLink').href = `/hoy/?slug=${encodeURIComponent(slug)}`;
+        document.getElementById('togglePause').textContent = s.bot_paused ? 'Reactivar bot' : 'Pausar bot';
+
+        const svc = await fetch(`/api/admin/services?slug=${encodeURIComponent(slug)}`, { credentials: 'same-origin' }).then((r) => r.json());
         const body = document.getElementById('svcBody');
         body.innerHTML = '';
-        (svc.services || []).forEach((s) => {
+        (svc.services || []).forEach((row) => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${s.name}</td>
-            <td><input data-id="${s.id}" data-f="price" value="${s.price_eur}" style="width:4.5rem" /></td>
-            <td><input data-id="${s.id}" data-f="dur" value="${s.duration_min}" style="width:4rem" /></td>
-            <td><button type="button" data-save="${s.id}">Guardar</button></td>`;
+          tr.innerHTML = `<td>${row.name}</td>
+            <td><input data-id="${row.id}" data-f="price" value="${row.price_eur}" style="width:4.5rem" /></td>
+            <td><input data-id="${row.id}" data-f="dur" value="${row.duration_min}" style="width:4rem" /></td>
+            <td><button type="button" data-save="${row.id}">Guardar</button></td>`;
           body.appendChild(tr);
         });
         body.querySelectorAll('[data-save]').forEach((btn) => {
@@ -75,23 +186,106 @@
               method: 'PUT',
               credentials: 'same-origin',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id: Number(id), price_eur: Number(price), duration_min: Number(duration_min) })
+              body: JSON.stringify({ id: Number(id), price_eur: Number(price), duration_min: Number(duration_min), slug })
             });
             btn.textContent = 'OK';
             setTimeout(() => (btn.textContent = 'Guardar'), 800);
           });
         });
 
-        const convs = await fetch('/api/admin/conversations?slug=atelier-luna', { credentials: 'same-origin' }).then((r) => r.json());
+        const convs = await fetch(`/api/admin/conversations?slug=${encodeURIComponent(slug)}`, { credentials: 'same-origin' }).then((r) => r.json());
         document.getElementById('convs').innerHTML = (convs.conversations || [])
           .map((c) => `<li><strong>${c.wa_from}</strong> — ${c.last_message || ''}</li>`)
           .join('') || '<li>Sin conversaciones aún</li>';
 
-        const appts = await fetch('/api/admin/appointments?slug=atelier-luna', { credentials: 'same-origin' }).then((r) => r.json());
+        const appts = await fetch(`/api/admin/appointments?slug=${encodeURIComponent(slug)}`, { credentials: 'same-origin' }).then((r) => r.json());
         document.getElementById('appts').innerHTML = (appts.appointments || [])
-          .map((a) => `<li>${a.client_name || a.client_phone} · ${a.starts_at} · ${a.status}</li>`)
+          .map((a) => `<li>${a.client_name || a.client_phone} · ${a.service_name || ''} · ${a.starts_at} · ${a.status}</li>`)
           .join('') || '<li>Sin citas aún</li>';
       }
+
+      async function patch(body) {
+        const r = await fetch('/api/admin/salons', {
+          method: 'PATCH',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: currentSlug, ...body })
+        });
+        const data = await r.json();
+        document.getElementById('actionMsg').textContent = r.ok
+          ? (data.notify && !data.notify.ok && data.notify.skipped
+            ? 'Guardado (WA no configurado; nota en panel).'
+            : 'Guardado.')
+          : data.error || 'Error';
+        await loadSalons();
+      }
+
+      document.getElementById('saveBilling').addEventListener('click', () =>
+        patch({
+          billing_status: document.getElementById('billingStatus').value,
+          next_payment_at: document.getElementById('nextPayment').value || null,
+          monthly_fee: Number(document.getElementById('monthlyFee').value)
+        })
+      );
+      document.getElementById('togglePause').addEventListener('click', () => {
+        const s = salonsCache.find((x) => x.slug === currentSlug);
+        patch({ bot_paused: !s?.bot_paused });
+      });
+      document.getElementById('saveOwner').addEventListener('click', () =>
+        patch({ owner_phone: document.getElementById('ownerPhone').value })
+      );
+      document.getElementById('saveNotes').addEventListener('click', () =>
+        patch({ agency_notes: document.getElementById('agencyNotes').value })
+      );
+      document.getElementById('notifyOwner').addEventListener('click', () =>
+        patch({
+          agency_notes: document.getElementById('agencyNotes').value,
+          owner_phone: document.getElementById('ownerPhone').value,
+          notify_owner: true,
+          notify_text: document.getElementById('agencyNotes').value
+        })
+      );
+
+      document.getElementById('createLocal').addEventListener('click', async () => {
+        const name = document.getElementById('newName').value.trim();
+        let slug = document.getElementById('newSlug').value.trim();
+        if (!slug && name) slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const business_type = document.getElementById('newType').value;
+        const r = await fetch('/api/admin/salons', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            slug,
+            business_type,
+            services: [{ name: 'Sesión / servicio base', price_eur: 40, duration_min: 45, category: 'base' }],
+            staff: [{ name: 'Profesional', services: ['base'], days: ['mon', 'tue', 'wed', 'thu', 'fri'] }]
+          })
+        });
+        const data = await r.json();
+        document.getElementById('actionMsg').textContent = r.ok ? `Creado ${data.salon?.slug}` : data.error || 'Error';
+        if (r.ok) {
+          currentSlug = data.salon.slug;
+          await loadSalons();
+        }
+      });
+
+      document.getElementById('filterBilling').addEventListener('change', () => {
+        const list = document.getElementById('salonList');
+        list.innerHTML = '';
+        filteredSalons().forEach((s) => {
+          const li = document.createElement('li');
+          const paused = s.bot_paused ? ' · PAUSADO' : '';
+          li.innerHTML = `<button type="button" data-slug="${s.slug}" style="all:unset;cursor:pointer;color:inherit">
+            <strong>${s.name}</strong> (${s.business_type || '?'}) — ${s.billing_status}${paused}
+          </button>`;
+          list.appendChild(li);
+        });
+        list.querySelectorAll('[data-slug]').forEach((btn) => {
+          btn.addEventListener('click', () => selectSalon(btn.getAttribute('data-slug')));
+        });
+      });
 
       document.getElementById('loginBtn').addEventListener('click', async () => {
         loginErr.hidden = true;
@@ -109,14 +303,14 @@
         }
         login.hidden = true;
         panel.hidden = false;
-        await loadAll();
+        await loadSalons();
       });
 
       document.getElementById('logout').addEventListener('click', async () => {
         await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
         location.reload();
       });
-      document.getElementById('reload').addEventListener('click', loadAll);
+      document.getElementById('reload').addEventListener('click', loadSalons);
       checkSession();
     </script>
   </body>

@@ -1,7 +1,7 @@
 (function () {
-  const cfg = window.CITACLARA || {};
+  const cfg = window.KLARO || window.RECEBOT || window.MOSTRADOR || window.CITACLARA || {};
   const number = String(cfg.whatsappNumber || '').replace(/\D/g, '');
-  const prefill = cfg.whatsappPrefill || 'Hola, quiero info de CitaClara.';
+  const prefill = cfg.whatsappPrefill || 'Hola, quiero info de Klaro.';
 
   function waUrl(extra) {
     const text = extra ? `${prefill}\n\n${extra}` : prefill;
@@ -13,16 +13,29 @@
   if (setupEl && cfg.setupPrice) setupEl.textContent = cfg.setupPrice;
   if (monthlyEl && cfg.monthlyPrice) monthlyEl.textContent = cfg.monthlyPrice;
 
+  document.querySelectorAll('.logo, .brand-mark').forEach((el) => {
+    if (cfg.brand) el.textContent = cfg.brand;
+  });
+
+  // CTAs superiores: WhatsApp si hay número real; si no, ancla al formulario
+  const placeholder = !number || number === '34600000000';
   ['ctaHero', 'ctaTop'].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.setAttribute('href', waUrl());
+    if (!el) return;
+    if (placeholder) {
+      el.setAttribute('href', '#contacto');
+      if (id === 'ctaHero') el.textContent = 'Pedir información';
+      if (id === 'ctaTop') el.textContent = 'Contacto';
+    } else {
+      el.setAttribute('href', waUrl());
+    }
   });
 
   const lines = [
-    { who: 'them', text: 'Hola, ¿cuánto cuesta un balayage?' },
-    { who: 'us', text: 'Balayage desde 75 € (aprox. 2h). ¿Quieres que te reserve?' },
+    { who: 'them', text: 'Hola, ¿cuánto cuesta la consulta?' },
+    { who: 'us', text: 'Consulta desde 45 € (aprox. 45 min). ¿Te reservo?' },
     { who: 'them', text: 'Sí, el viernes por la tarde' },
-    { who: 'us', text: 'Tengo viernes 17:30 con María. ¿Te lo dejo?' }
+    { who: 'us', text: 'Viernes 17:30. ¿Lo confirmo?' }
   ];
 
   const chat = document.getElementById('mockChat');
@@ -46,27 +59,24 @@
     status.hidden = false;
     status.textContent = 'Enviando…';
 
+    const btn = form.querySelector('[type="submit"]');
+    if (btn) btn.disabled = true;
+
     try {
       const res = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (!res.ok) throw new Error('fail');
-      status.textContent = 'Recibido. Abriendo WhatsApp…';
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(out.error || 'fail');
+      status.textContent = 'Solicitud recibida. Te escribimos por email en menos de 24 h.';
+      form.reset();
     } catch {
-      status.textContent = 'No se pudo guardar online; abriendo WhatsApp…';
+      status.textContent =
+        'No se pudo enviar ahora. Escríbenos a ' + (cfg.contactEmail || 'hola@klaroapp.pages.dev');
+    } finally {
+      if (btn) btn.disabled = false;
     }
-
-    const extra = [
-      `Salón: ${data.salon_name || ''}`,
-      data.neighborhood ? `Zona: ${data.neighborhood}` : '',
-      `Tel: ${data.phone || ''}`,
-      data.note ? `Nota: ${data.note}` : ''
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    window.location.href = waUrl(extra);
   });
 })();

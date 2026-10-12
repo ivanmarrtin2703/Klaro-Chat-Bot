@@ -3,3 +3,8 @@ node_modules/
 .dev.vars
 .DS_Store
 *.log
+app/.cookies.txt
+*.cookies.txt
+gestion/clientes/*
+!gestion/clientes/_ejemplo-*/
+!gestion/clientes/_ejemplo-*/**

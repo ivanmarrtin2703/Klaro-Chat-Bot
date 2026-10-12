@@ -12,7 +12,7 @@ export async function onRequestGet(context) {
   if (!(await verifySession(context.env, context.request.headers.get('Cookie') || ''))) {
     return json({ error: 'unauthorized' }, 401);
   }
-  const slug = new URL(context.request.url).searchParams.get('slug') || 'atelier-luna';
+  const slug = new URL(context.request.url).searchParams.get('slug') || 'fisio-demo';
   await ensureDemoSalon(context.env.DB);
   const salon = await getSalonBySlug(context.env.DB, slug);
   const { results } = await context.env.DB.prepare(

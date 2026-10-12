@@ -3,15 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CitaClara — Recepcionista WhatsApp para peluquerías</title>
+    <title>Klaro — Recepcionista WhatsApp para negocios con cita</title>
     <meta
       name="description"
-      content="CitaClara responde precios, horarios y agenda citas por WhatsApp 24/7. Para peluquerías en Almería."
+      content="Klaro responde precios, horarios y agenda citas por WhatsApp 24/7. Para negocios con cita. Te lo montamos nosotros."
+    />
+    <meta property="og:title" content="Klaro — Recepcionista WhatsApp" />
+    <meta
+      property="og:description"
+      content="Precios, horarios y citas por WhatsApp. Pack claro para negocios con cita."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
@@ -20,105 +25,145 @@
     <div class="grain" aria-hidden="true"></div>
 
     <header class="top">
-      <a class="logo" href="#top">CitaClara</a>
-      <a class="top-cta" id="ctaTop" href="#contacto">Hablar por WhatsApp</a>
+      <div class="top-inner">
+        <a class="logo" href="#top">Klaro</a>
+        <nav class="top-nav" aria-label="Principal">
+          <a class="top-link" href="/demo/">Demo</a>
+          <a class="top-cta" id="ctaTop" href="#contacto">WhatsApp</a>
+        </nav>
+      </div>
     </header>
 
     <main id="top">
       <section class="hero">
-        <p class="brand-mark">CitaClara</p>
-        <h1>Tu peluquería responde sola por WhatsApp</h1>
-        <p class="lede">
-          Precios, horarios y citas 24/7 — aunque estés con la cliente o cerrados.
-        </p>
-        <div class="cta-row">
-          <a class="btn primary" id="ctaHero" href="#">Pedir info</a>
-          <a class="btn ghost" href="#como">Cómo funciona</a>
-        </div>
-        <div class="hero-phone" aria-hidden="true">
-          <div class="phone-frame">
-            <div class="phone-notch"></div>
-            <div class="chat" id="mockChat"></div>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="brand-mark">Klaro</p>
+            <h1>WhatsApp que atiende tu negocio por ti</h1>
+            <p class="lede">
+              Precios, horarios y citas 24/7. Lo configuramos nosotros; tú atiendes a quien importa.
+            </p>
+            <div class="cta-row">
+              <a class="btn primary" id="ctaHero" href="#">Hablar por WhatsApp</a>
+              <a class="btn ghost" href="/demo/">Probar demo</a>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="chat-panel">
+              <p class="chat-panel-label">Así responde Klaro</p>
+              <div class="chat" id="mockChat"></div>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="section" id="como">
-        <h2>Cómo funciona</h2>
-        <p class="section-lede">Tres pasos. Sin app nueva para tus clientas.</p>
-        <ol class="steps">
-          <li>
-            <span class="step-n">01</span>
-            <strong>Cargamos tu carta</strong>
-            <span>Servicios, precios, profesionales y horarios.</span>
-          </li>
-          <li>
-            <span class="step-n">02</span>
-            <strong>Conectamos WhatsApp</strong>
-            <span>El bot atiende; tú recibes avisos cuando hace falta.</span>
-          </li>
-          <li>
-            <span class="step-n">03</span>
-            <strong>Agenda citas sola</strong>
-            <span>Confirmación al cliente y recordatorio al día siguiente.</span>
-          </li>
-        </ol>
+        <div class="section-inner">
+          <h2>Cómo funciona</h2>
+          <p class="section-lede">Tres pasos. Sin app nueva para tus clientes.</p>
+          <ol class="steps">
+            <li>
+              <span class="step-n">01</span>
+              <strong>Cargamos tu carta</strong>
+              <span>Servicios, precios, profesionales y horarios.</span>
+            </li>
+            <li>
+              <span class="step-n">02</span>
+              <strong>Conectamos WhatsApp</strong>
+              <span>El bot atiende; te avisamos cuando hace falta una persona.</span>
+            </li>
+            <li>
+              <span class="step-n">03</span>
+              <strong>Agenda citas</strong>
+              <span>Confirmación al cliente y recordatorio al día siguiente.</span>
+            </li>
+          </ol>
+        </div>
       </section>
 
       <section class="section muted" id="para-quien">
-        <h2>Para quién</h2>
-        <p class="section-lede">
-          Peluquerías y centros de estética en Almería con 2–6 sillas que ya viven en WhatsApp.
-        </p>
-      </section>
-
-      <section class="section" id="precios">
-        <h2>Precio claro</h2>
-        <p class="section-lede">Un pack. Sin comisión por cita.</p>
-        <div class="price-block">
-          <div class="price-line">
-            <span>Setup</span>
-            <strong id="priceSetup">549 €</strong>
-          </div>
-          <div class="price-line">
-            <span>Mensual</span>
-            <strong id="priceMonthly">129 €</strong>
-          </div>
-          <p class="price-note">
-            Incluye conexión, configuración de tu carta y ajustes las primeras semanas.
+        <div class="section-inner">
+          <h2>Para quién</h2>
+          <p class="section-lede">
+            Negocios con cita — locales que pierden mensajes fuera de horario o mientras atienden.
+            Lo montamos nosotros (no es un SaaS que configures tú).
           </p>
         </div>
       </section>
 
+      <section class="section" id="demo">
+        <div class="section-inner">
+          <h2>Probar demo</h2>
+          <p class="section-lede">
+            Chat por opciones como en WhatsApp: precios, horarios y pedir cita. Sin instalar nada.
+          </p>
+          <a class="btn primary" href="/demo/">Abrir demo</a>
+        </div>
+      </section>
+
+      <section class="section" id="precios">
+        <div class="section-inner">
+          <h2>Precio claro</h2>
+          <p class="section-lede">Un pack. Sin comisión por cita. Sin cobros al cliente final.</p>
+          <div class="price-block">
+            <div class="price-rule" aria-hidden="true"></div>
+            <div class="price-line">
+              <span class="price-label">Setup</span>
+              <strong id="priceSetup">549 €</strong>
+            </div>
+            <div class="price-line">
+              <span class="price-label">Mensual</span>
+              <strong id="priceMonthly">129 €</strong>
+            </div>
+            <div class="price-rule" aria-hidden="true"></div>
+            <p class="price-includes-title">Qué incluye</p>
+            <ul class="price-includes">
+              <li>Conexión WhatsApp Business</li>
+              <li>Configuración de tu carta y horarios</li>
+              <li>Ajustes las primeras semanas · agency managed</li>
+            </ul>
+            <div class="price-rule" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="section contact" id="contacto">
-        <h2>Cuéntanos tu salón</h2>
-        <p class="section-lede">Te respondemos por WhatsApp con una demo.</p>
-        <form id="leadForm" class="lead-form">
-          <label>
-            Nombre del salón
-            <input name="salon_name" required autocomplete="organization" placeholder="Ej. Atelier Luna" />
-          </label>
-          <label>
-            Barrio / zona
-            <input name="neighborhood" autocomplete="address-level2" placeholder="Ej. Zapillo, Roquetas…" />
-          </label>
-          <label>
-            Teléfono WhatsApp
-            <input name="phone" required type="tel" autocomplete="tel" placeholder="6XX XXX XXX" />
-          </label>
-          <label>
-            Nota (opcional)
-            <textarea name="note" rows="3" placeholder="¿Cuántas sillas? ¿Usáis Booksy?"></textarea>
-          </label>
-          <button class="btn primary" type="submit">Enviar y abrir WhatsApp</button>
-          <p class="form-status" id="formStatus" hidden></p>
-        </form>
+        <div class="section-inner">
+          <h2>Cuéntanos tu negocio</h2>
+          <p class="section-lede">Déjanos tus datos y te respondemos por email en menos de 24 h.</p>
+          <form id="leadForm" class="lead-form">
+            <label>
+              Nombre del negocio
+              <input name="salon_name" required autocomplete="organization" placeholder="Ej. Clínica Norte" />
+            </label>
+            <label>
+              Email
+              <input name="email" required type="email" autocomplete="email" placeholder="tu@email.com" />
+            </label>
+            <label>
+              Barrio / zona
+              <input name="neighborhood" autocomplete="address-level2" placeholder="Ej. centro, Roquetas…" />
+            </label>
+            <label>
+              Teléfono (opcional)
+              <input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="6XX XXX XXX" />
+            </label>
+            <label>
+              Nota (opcional)
+              <textarea name="note" rows="3" placeholder="¿Tipo de negocio? ¿Qué te gustaría automatizar?"></textarea>
+            </label>
+            <button class="btn primary block" type="submit">Enviar solicitud</button>
+            <p class="form-status" id="formStatus" hidden></p>
+          </form>
+        </div>
       </section>
     </main>
 
     <footer class="foot">
-      <span>CitaClara · Almería</span>
-      <span>Recepcionista IA por WhatsApp</span>
+      <div class="foot-inner">
+        <span>Klaro · negocios locales</span>
+        <span>Recepcionista por WhatsApp · agency managed</span>
+      </div>
     </footer>
 
     <script src="/config.js"></script>

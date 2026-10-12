@@ -1,5 +1,5 @@
 import { handleUserMessage } from '../../cloudflare/conversation.js';
-import { parseIncoming, sendWhatsAppText } from '../../cloudflare/whatsapp.js';
+import { parseIncoming, sendWhatsAppInteractive, sendWhatsAppText } from '../../cloudflare/whatsapp.js';
 
 function text(body, status = 200) {
   return new Response(body, { status, headers: { 'Content-Type': 'text/plain' } });
@@ -29,18 +29,28 @@ export async function onRequestPost(context) {
   }
 
   const incoming = parseIncoming(body);
-  if (!incoming || !incoming.text) {
+  if (!incoming || (!incoming.text && !incoming.interactiveId)) {
     return text('ok', 200);
   }
 
-  const slug = env.DEFAULT_SALON_SLUG || 'atelier-luna';
+  const slug = env.DEFAULT_SALON_SLUG || 'fisio-demo';
   try {
-    const { reply } = await handleUserMessage(env, {
+    const { reply, interactive } = await handleUserMessage(env, {
       slug,
       waFrom: incoming.from,
-      text: incoming.text
+      text: incoming.text,
+      interactiveId: incoming.interactiveId
     });
-    await sendWhatsAppText(env, incoming.from, reply);
+    if (interactive) {
+      const sent = await sendWhatsAppInteractive(env, incoming.from, interactive);
+      if (!sent.ok && sent.skipped) {
+        await sendWhatsAppText(env, incoming.from, reply);
+      } else if (!sent.ok) {
+        await sendWhatsAppText(env, incoming.from, reply);
+      }
+    } else {
+      await sendWhatsAppText(env, incoming.from, reply);
+    }
   } catch (err) {
     console.error('webhook error', err);
   }

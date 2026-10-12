@@ -14,7 +14,7 @@ async function requireAuth(context) {
 
 export async function onRequestGet(context) {
   if (!(await requireAuth(context))) return json({ error: 'unauthorized' }, 401);
-  const slug = new URL(context.request.url).searchParams.get('slug') || 'atelier-luna';
+  const slug = new URL(context.request.url).searchParams.get('slug') || 'fisio-demo';
   await ensureDemoSalon(context.env.DB);
   const salon = await getSalonBySlug(context.env.DB, slug);
   return json({ services: salon?.services || [] });
@@ -51,7 +51,7 @@ export async function onRequestPut(context) {
 export async function onRequestPost(context) {
   if (!(await requireAuth(context))) return json({ error: 'unauthorized' }, 401);
   const body = await context.request.json().catch(() => ({}));
-  const slug = String(body.slug || 'atelier-luna');
+  const slug = String(body.slug || 'fisio-demo');
   await ensureDemoSalon(context.env.DB);
   const salon = await getSalonBySlug(context.env.DB, slug);
   if (!salon) return json({ error: 'salon not found' }, 404);

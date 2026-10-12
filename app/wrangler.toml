@@ -5,5 +5,5 @@ pages_build_output_dir = "public"
 [[d1_databases]]
 binding = "DB"
 database_name = "citaclara-db"
-database_id = "local-citaclara-db"
+database_id = "77b4e042-9a55-4f35-901d-31af44cafa59"
 migrations_dir = "migrations"

@@ -7,7 +7,7 @@
     "dev": "wrangler pages dev public --persist-to=.wrangler/state",
     "db:migrate:local": "wrangler d1 migrations apply citaclara-db --local --persist-to=.wrangler/state",
     "db:migrate:remote": "wrangler d1 migrations apply citaclara-db --remote",
-    "deploy": "wrangler pages deploy public --project-name=citaclara-app"
+    "deploy": "wrangler pages deploy public --project-name=citaclara-app --branch=main --commit-dirty=true"
   },
   "devDependencies": {
     "wrangler": "^4.40.0"
