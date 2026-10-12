@@ -8,8 +8,8 @@
 | Admin agency | hecho (locales, cobros, pausa, notas) |
 | Panel Hoy | hecho (`/hoy/`, PIN local) |
 | Meta docs | hecho |
-| GitHub | hecho — https://github.com/ivanmarrtin2703/citaclara |
-| Portfolio | hecho — demo `/demos/citaclara/` |
+| GitHub | hecho — https://github.com/ivanmarrtin2703/Klaro-Chat-Bot |
+| Portfolio | hecho — «Klaro-Chat Bot» en https://ivanmartin.pages.dev (En desarrollo.) + demo `/demos/citaclara/` |
 | Deploy Pages app | hecho — https://citaclara-app.pages.dev |
 | Deploy Pages landing | hecho — https://klaroapp.pages.dev (proyecto `klaroapp`, D1 `recebot-landing-db`) |
 | D1 remoto app | hecho — `citaclara-db` + migraciones `0001`/`0002` |
